@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reset Password - Admin</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #8b0000 0%, #6b1a1a 100%); min-height:100vh; display:flex; align-items:center; justify-content:center; }
+        .card { width: 420px; padding: 30px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); background: #fff; animation: slideIn 0.5s ease; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .btn-primary { background:#8b0000; border: none; }
+        .btn-primary:hover { background-color: #6b1a1a; }
+        .alert { display:none; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        {% if invalid %}
+            <div style="text-align:center;">
+                <i class="fas fa-exclamation-triangle" style="font-size: 40px; color: #8b0000; margin-bottom:15px;"></i>
+                <h4 style="color:#8b0000; text-align:center;">Invalid or expired link</h4>
+                <p style="text-align:center; color:#666; font-size:13px;">The reset link is invalid or has expired. Please request a new one.</p>
+                <div style="text-align:center; margin-top:20px;">
+                    <a href="/admin/forgot" class="btn btn-primary" style="text-decoration:none; width:100%;">Request a new link</a>
+                </div>
+            </div>
+        {% else %}
+            <h3 style="color:#8b0000; text-align:center;"><i class="fas fa-key"></i> Set a New Password</h3>
+            <p style="text-align:center; color:#666; font-size:13px; margin-bottom:25px;">Please enter a new password for <strong>{{ identifier }}</strong></p>
+
+            <div id="alertBox" class="alert"></div>
+
+            <form id="resetForm" onsubmit="handleReset(event)">
+                <div class="mb-3">
+                    <label for="password" class="form-label">New password</label>
+                    <input type="password" class="form-control" id="password" required placeholder="Enter new password" autocomplete="new-password">
+                </div>
+                <div class="mb-3">
+                    <label for="confirm" class="form-label">Confirm password</label>
+                    <input type="password" class="form-control" id="confirm" required placeholder="Confirm password" autocomplete="new-password">
+                </div>
+                <button class="btn btn-primary w-100" id="resetBtn">Save password</button>
+            </form>
+
+            <div style="margin-top:15px; text-align:center;">
+                <a href="/admin/login" style="color:#8b0000; font-weight:600; text-decoration:none;">Back to login</a>
+            </div>
+        {% endif %}
+    </div>
+
+    <script>
+        async function handleReset(e){
+            e.preventDefault();
+            const password = document.getElementById('password').value;
+            const confirm = document.getElementById('confirm').value;
+            const alertBox = document.getElementById('alertBox');
+            const resetBtn = document.getElementById('resetBtn');
+            alertBox.className = 'alert';
+
+            if(password !== confirm){
+                alertBox.textContent = 'Passwords do not match.';
+                alertBox.className = 'alert alert-danger';
+                alertBox.style.display = 'block';
+                return;
+            }
+
+            resetBtn.disabled = true;
+            resetBtn.innerText = "Saving...";
+
+            try{
+                // Note: {{ token }} is injected by Python
+                const res = await fetch('/admin/reset/{{ token }}', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password })
+                });
+                const data = await res.json();
+                
+                if(res.ok){
+                    alertBox.textContent = data.message || 'Password reset successful.';
+                    alertBox.className = 'alert alert-success';
+                    alertBox.style.display = 'block';
+                    setTimeout(()=>{ window.location.href = '/admin/login'; }, 2000);
+                } else {
+                    alertBox.textContent = data.message || 'Error resetting password.';
+                    alertBox.className = 'alert alert-danger';
+                    alertBox.style.display = 'block';
+                    resetBtn.disabled = false;
+                    resetBtn.innerText = "Save password";
+                }
+            }catch(err){
+                alertBox.textContent = 'Connection error. Please try again.';
+                alertBox.className = 'alert alert-danger';
+                alertBox.style.display = 'block';
+                resetBtn.disabled = false;
+                resetBtn.innerText = "Save password";
+            }
+        }
+    </script>
+</body>
+</html>

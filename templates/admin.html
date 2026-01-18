@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - SVVSS College</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f7fa; }
+        
+        .sidebar {
+            background: linear-gradient(135deg, #8b0000 0%, #6b1a1a 100%);
+            color: white;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 260px;
+            overflow-y: auto;
+            padding: 20px 0;
+            z-index: 1000;
+        }
+        
+        .sidebar-header {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            margin-bottom: 20px;
+        }
+        
+        .sidebar-header h5 { margin: 0; font-size: 18px; }
+        .sidebar-header p { margin: 5px 0 0; font-size: 12px; opacity: 0.8; }
+        
+        .nav-menu { list-style: none; }
+        .nav-item { padding: 0; margin: 0; }
+        
+        .nav-link {
+            color: white;
+            padding: 15px 25px;
+            display: block;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+            cursor: pointer;
+        }
+        
+        .nav-link:hover {
+            background: rgba(255,255,255,0.1);
+            border-left-color: #caa64b;
+        }
+        
+        .nav-link.active {
+            background: rgba(255,255,255,0.2);
+            border-left-color: #caa64b;
+            font-weight: 600;
+        }
+        
+        .logout-btn {
+            position: absolute;
+            bottom: 20px;
+            width: 90%;
+            left: 5%;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid white;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .logout-btn:hover {
+            background: white;
+            color: #8b0000;
+        }
+        
+        .main-content {
+            margin-left: 260px;
+            padding: 30px;
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h2 { margin: 0; color: #8b0000; }
+        .header-time { color: #666; font-size: 14px; }
+        
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            text-align: center;
+            margin-bottom: 20px;
+            border-top: 4px solid #8b0000;
+            transition: transform 0.3s ease;
+        }
+        
+        .stat-card:hover { transform: translateY(-5px); }
+        .stat-card h4 { color: #8b0000; margin: 10px 0 0; font-weight: 600; }
+        .stat-card .value { font-size: 32px; font-weight: bold; color: #333; margin: 10px 0; }
+        
+        .section { display: none; }
+        .section.active { display: block; }
+        
+        .section-content {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .section h3 {
+            color: #8b0000;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #caa64b;
+        }
+        
+        .form-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        
+        .form-group { margin-bottom: 15px; }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #8b0000;
+            box-shadow: 0 0 5px rgba(139,0,0,0.2);
+        }
+        
+        textarea.form-control { resize: vertical; min-height: 100px; }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary { background: #8b0000; color: white; }
+        .btn-primary:hover { background: #6b1a1a; transform: translateY(-2px); }
+        .btn-success { background: #28a745; color: white; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-secondary { background: #6c757d; color: white; }
+        .btn-sm { padding: 6px 12px; font-size: 12px; }
+        
+        .table-responsive {
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+        
+        thead {
+            background: linear-gradient(135deg, #8b0000 0%, #6b1a1a 100%);
+            color: white;
+        }
+        
+        th { padding: 15px; text-align: left; font-weight: 600; border: none; }
+        td { padding: 12px 15px; border-bottom: 1px solid #eee; }
+        tbody tr:hover { background: #f8f9fa; }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .status-active { background: #d4edda; color: #155724; }
+        .status-inactive { background: #f8d7da; color: #721c24; }
+        
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-overlay.active { display: flex; }
+        
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #caa64b;
+        }
+        
+        .modal-header h3 { margin: 0; color: #8b0000; }
+        .modal-close { background: none; border: none; font-size: 24px; cursor: pointer; color: #666; }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .alert.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; display: block; }
+        .alert.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; display: block; }
+        
+        @media (max-width: 768px) {
+            .sidebar { width: 0; transform: translateX(-100%); transition: transform 0.3s ease; }
+            .sidebar.active { transform: translateX(0); width: 260px; }
+            .main-content { margin-left: 0; padding: 20px; }
+            .header { flex-direction: column; gap: 15px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h5>Teacher Training College, Naldurg
+Junior College of Education Admin</h5>
+            <p>Management Panel</p>
+        </div>
+        
+        <ul class="nav-menu">
+            <li class="nav-item"><a class="nav-link active" onclick="switchSection('dashboard')"><i class="fas fa-chart-line"></i> Dashboard</a></li>
+            <li class="nav-item"><a class="nav-link" onclick="switchSection('documents')"><i class="fas fa-file-alt"></i> Documents</a></li>
+            <li class="nav-item"><a class="nav-link" onclick="switchSection('staff')"><i class="fas fa-users"></i> Staff</a></li>
+            <li class="nav-item"><a class="nav-link" onclick="switchSection('gallery')"><i class="fas fa-images"></i> Gallery</a></li>
+        </ul>
+        
+        <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+    </div>
+    
+    <div class="main-content">
+        <div class="header">
+            <div><h2>Dashboard</h2><p class="header-time" id="current-time"></p></div>
+        </div>
+        
+        <div id="dashboard" class="section active">
+            <div class="row mb-4">
+                <div class="col-md-4"><div class="stat-card"><i class="fas fa-file-alt" style="font-size:32px;color:#8b0000;"></i><div class="value" id="docCount">0</div><h4>Total Documents</h4></div></div>
+                <div class="col-md-4"><div class="stat-card"><i class="fas fa-users" style="font-size:32px;color:#8b0000;"></i><div class="value" id="staffCount">0</div><h4>Total Staff</h4></div></div>
+                <div class="col-md-4"><div class="stat-card"><i class="fas fa-images" style="font-size:32px;color:#8b0000;"></i><div class="value" id="galleryCount">0</div><h4>Gallery Images</h4></div></div>
+            </div>
+            <div class="section-content"><h3>Welcome to Admin Panel</h3><p>Manage all website content from here. Use sidebar to navigate different sections.</p></div>
+        </div>
+        
+        <div id="documents" class="section">
+            <div class="section-content">
+                <h3>Document Management</h3>
+                <button class="btn btn-primary mb-4" onclick="openDocModal()"><i class="fas fa-plus"></i> Add Document</button>
+                <div id="docAlert" class="alert"></div>
+                <div class="table-responsive"><table><thead><tr><th>Title</th><th>Category</th><th>Type</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead><tbody id="docTable"></tbody></table></div>
+            </div>
+        </div>
+        
+        <div id="staff" class="section">
+            <div class="section-content">
+                <h3>Staff Management</h3>
+                <button class="btn btn-primary mb-4" onclick="openStaffModal()"><i class="fas fa-plus"></i> Add Staff Member</button>
+                <div id="staffAlert" class="alert"></div>
+                <div class="table-responsive"><table><thead><tr><th>Photo</th><th>Name</th><th>Role</th><th>Department</th><th>Email</th><th>Status</th><th>Actions</th></tr></thead><tbody id="staffTable"></tbody></table></div>
+            </div>
+        </div>
+        
+
+        
+        <div id="gallery" class="section">
+            <div class="section-content">
+                <h3>Photo Gallery</h3>
+                <button class="btn btn-primary mb-4" onclick="openGalleryModal()"><i class="fas fa-plus"></i> Upload Photos</button>
+                <div id="galleryAlert" class="alert"></div>
+                <div id="galleryGrid" class="row g-3"></div>
+            </div>
+        </div> 
+    </div>
+    
+    <div id="docModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header"><h3>Add Document</h3><button class="modal-close" onclick="closeDocModal()"><i class="fas fa-times"></i></button></div>
+            <form onsubmit="saveDocument(event)">
+                <input type="hidden" id="docEditId">
+                <div class="form-group"><label class="form-label">Title (English)</label><input type="text" class="form-control" id="docTitleEn" required></div>
+                <div class="form-group"><label class="form-label">Title (Marathi)</label><input type="text" class="form-control" id="docTitleMr" required></div>
+                <div class="form-group"><label class="form-label">Description (English)</label><textarea class="form-control" id="docDescEn"></textarea></div>
+                <div class="form-group"><label class="form-label">Description (Marathi)</label><textarea class="form-control" id="docDescMr"></textarea></div>
+                <div class="form-group"><label class="form-label">Category</label><select class="form-control" id="docCategory"><option value="recognition">Recognition</option><option value="staff">Staff</option><option value="audit">Audit</option><option value="library">Library</option><option value="other">Other</option></select></div>
+                <div class="form-group"><label class="form-label">Document File (optional when editing)</label><input type="file" class="form-control" id="docFile" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"></div>
+                <button type="submit" class="btn btn-primary">Save Document</button>
+            </form>
+        </div>
+    </div>
+    
+    <div id="staffModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header"><h3>Add Staff Member</h3><button class="modal-close" onclick="closeStaffModal()"><i class="fas fa-times"></i></button></div>
+            <form onsubmit="saveStaff(event)">
+                <input type="hidden" id="staffEditId">
+
+                <div class="form-group"><label class="form-label">Name (English)</label><input type="text" class="form-control" id="staffNameEn" required></div>
+                <div class="form-group"><label class="form-label">Name (Marathi)</label><input type="text" class="form-control" id="staffNameMr" required></div>
+                <div class="form-group"><label class="form-label">Role (English)</label><input type="text" class="form-control" id="staffRoleEn" required></div>
+                <div class="form-group"><label class="form-label">Role (Marathi)</label><input type="text" class="form-control" id="staffRoleMr" required></div>
+                <div class="form-group"><label class="form-label">Department</label><input type="text" class="form-control" id="staffDept"></div>
+                <div class="form-group"><label class="form-label">Email</label><input type="email" class="form-control" id="staffEmail"></div>
+                <div class="form-group"><label class="form-label">Phone</label><input type="tel" class="form-control" id="staffPhone"></div>
+                <div class="form-group"><label class="form-label">Qualification</label><textarea class="form-control" id="staffQual"></textarea></div>
+                <div class="form-group"><label class="form-label">Photo</label><input type="file" class="form-control" id="staffPhoto" accept="image/*"></div>
+                <button type="submit" class="btn btn-primary">Save Staff</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="galleryModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header"><h3>Upload Gallery Photos</h3><button class="modal-close" onclick="closeGalleryModal()"><i class="fas fa-times"></i></button></div>
+            <form onsubmit="uploadGallery(event)">
+                <div class="form-group"><label class="form-label">Select Photos</label><input type="file" class="form-control" id="galleryFiles" accept="image/*" multiple required></div>
+                <div class="form-group"><label class="form-label">Caption (optional)</label><input type="text" class="form-control" id="galleryCaption" placeholder="Caption for all selected images (optional)"></div>
+                <button type="submit" class="btn btn-primary">Upload</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Replace modals -->
+    <div id="docReplaceModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header"><h3>Replace Document File</h3><button class="modal-close" onclick="closeDocReplaceModal()"><i class="fas fa-times"></i></button></div>
+            <form onsubmit="replaceDocument(event)">
+                <input type="hidden" id="replaceDocId">
+                <div class="form-group"><label class="form-label">Select New File</label><input type="file" class="form-control" id="replaceDocFile" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" required></div>
+                <button type="submit" class="btn btn-primary">Replace</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="staffReplaceModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header"><h3>Replace Staff Photo</h3><button class="modal-close" onclick="closeStaffReplaceModal()"><i class="fas fa-times"></i></button></div>
+            <form onsubmit="replaceStaffPhoto(event)">
+                <input type="hidden" id="replaceStaffId">
+                <div class="form-group"><label class="form-label">Select New Photo</label><input type="file" class="form-control" id="replaceStaffFile" accept="image/*" required></div>
+                <button type="submit" class="btn btn-primary">Replace</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="galleryReplaceModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header"><h3>Replace Gallery Image</h3><button class="modal-close" onclick="closeGalleryReplaceModal()"><i class="fas fa-times"></i></button></div>
+            <form onsubmit="replaceGalleryImage(event)">
+                <input type="hidden" id="replaceGalleryId">
+                <div class="form-group"><label class="form-label">Select New Image</label><input type="file" class="form-control" id="replaceGalleryFile" accept="image/*" required></div>
+                <div class="form-group"><label class="form-label">Caption (optional)</label><input type="text" class="form-control" id="replaceGalleryCaption" placeholder="Caption (optional)"></div>
+                <button type="submit" class="btn btn-primary">Replace</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            checkAuth();
+            loadDashboard();
+            updateTime();
+            setInterval(updateTime, 1000);
+        });
+        
+        function checkAuth() {
+            fetch('/api/admin/documents').catch(() => {
+                window.location.href = '/admin/login';
+            });
+        }
+        
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('current-time').textContent = now.toLocaleDateString() + ' ' + now.toLocaleTimeString();
+        }
+        
+        function switchSection(sectionId) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById(sectionId).classList.add('active');
+            document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+            event.target.closest('.nav-link').classList.add('active');
+            document.querySelector('.header h2').textContent = sectionId.charAt(0).toUpperCase() + sectionId.slice(1);
+            
+            if (sectionId === 'documents') loadDocuments();
+            else if (sectionId === 'staff') loadStaff();
+            else if (sectionId === 'gallery') loadAdminGallery();
+        }
+        
+        async function loadDashboard() {
+            try {
+                const docs = await fetch('/api/admin/documents').then(r => r.json()).catch(() => []);
+                const staff = await fetch('/api/admin/staff').then(r => r.json()).catch(() => []);
+                const gallery = await fetch('/api/admin/gallery').then(r => r.json()).catch(() => []);
+                
+                document.getElementById('docCount').textContent = docs.length || 0;
+                document.getElementById('staffCount').textContent = staff.length || 0;
+                document.getElementById('galleryCount').textContent = gallery.length || 0; 
+            } catch (e) {
+                console.error('Error:', e);
+            }
+        }
+        
+        async function loadDocuments() {
+            try {
+                const response = await fetch('/api/admin/documents');
+                const docs = await response.json();
+                let html = '';
+                docs.forEach(doc => {
+                    html += `<tr><td>${doc.title_english}</td><td>${doc.category}</td><td>${doc.file_type}</td><td>${doc.upload_date}</td><td><span class="status-badge ${doc.is_active ? 'status-active' : 'status-inactive'}">${doc.is_active ? 'Active' : 'Inactive'}</span></td><td><a href="${doc.file_path}" target="_blank" class="btn btn-sm btn-success"><i class="fas fa-download"></i></a>&nbsp;<button class="btn btn-sm btn-primary" onclick="openEditDocModal(${doc.id})" title="Edit"><i class="fas fa-edit"></i></button>&nbsp;<button class="btn btn-sm btn-secondary" onclick="openReplaceDocModal(${doc.id})" title="Replace File"><i class="fas fa-exchange-alt"></i></button>&nbsp;<button class="btn btn-sm btn-danger" onclick="deleteDocument(${doc.id})"><i class="fas fa-trash"></i></button></td></tr>`;
+                });
+                document.getElementById('docTable').innerHTML = html || '<tr><td colspan="6" style="text-align:center;">No documents</td></tr>';
+            } catch (e) {
+                showAlert('docAlert', 'error', 'Error loading documents');
+            }
+        }
+        
+        function openDocModal() { document.getElementById('docEditId').value = ''; document.querySelector('#docModal form').reset(); document.getElementById('docModal').classList.add('active'); }
+        function closeDocModal() { document.getElementById('docModal').classList.remove('active'); document.querySelector('#docModal form').reset(); document.getElementById('docEditId').value = ''; }
+        
+        async function saveDocument(event) {
+            event.preventDefault();
+            const formData = new FormData();
+            formData.append('title_english', document.getElementById('docTitleEn').value);
+            formData.append('title_marathi', document.getElementById('docTitleMr').value);
+            formData.append('description_english', document.getElementById('docDescEn').value);
+            formData.append('description_marathi', document.getElementById('docDescMr').value);
+            formData.append('category', document.getElementById('docCategory').value);
+            formData.append('file', document.getElementById('docFile').files[0]);
+            
+            try {
+                const editId = document.getElementById('docEditId').value;
+                if (editId) {
+                    // Update existing document (form-data + optional file)
+                    const res = await fetch(`/api/admin/documents/${editId}`, { method: 'PUT', body: formData });
+                    if (res.ok) {
+                        closeDocModal(); loadDocuments(); loadDashboard(); showAlert('docAlert','success','Document updated');
+                    } else {
+                        const txt = await res.text(); showAlert('docAlert','error','Error updating: '+txt);
+                    }
+                } else {
+                    const response = await fetch('/api/admin/documents', { method: 'POST', body: formData });
+                    if (response.ok) {
+                        closeDocModal();
+                        loadDocuments();
+                        loadDashboard();
+                        showAlert('docAlert', 'success', 'Document added successfully!');
+                    } else {
+                        showAlert('docAlert', 'error', 'Error saving document');
+                    }
+                }
+            } catch (e) {
+                showAlert('docAlert', 'error', 'Error: ' + e.message);
+            }
+        }
+        
+        async function deleteDocument(id) {
+            if (confirm('Delete this document?')) {
+                try {
+                    await fetch(`/api/admin/documents/${id}`, { method: 'DELETE' });
+                    loadDocuments();
+                    loadDashboard();
+                } catch (e) {
+                    alert('Error deleting');
+                }
+            }
+        }
+        
+        async function loadStaff() {
+            try {
+                const response = await fetch('/api/admin/staff');
+                const staff = await response.json();
+                let html = '';
+                staff.forEach(member => {
+                    const photo = member.photo_path ? '/' + member.photo_path : 'https://via.placeholder.com/40x40/cccccc/666666?text=No';
+                    html += `<tr><td><img src="${photo}" style="width:40px;height:40px;object-fit:cover;border-radius:4px"></td><td>${member.name_english}</td><td>${member.role_english}</td><td>${member.department || '-'}</td><td>${member.email || '-'}</td><td><span class="status-badge ${member.is_active ? 'status-active' : 'status-inactive'}">${member.is_active ? 'Active' : 'Inactive'}</span></td><td><button class="btn btn-sm btn-primary" onclick="openEditStaffModal(${member.id})" title="Edit"><i class="fas fa-edit"></i></button>&nbsp;<button class="btn btn-sm btn-secondary" onclick="openReplaceStaffModal(${member.id})" title="Replace Photo"><i class="fas fa-exchange-alt"></i></button>&nbsp;<button class="btn btn-sm btn-danger" onclick="deleteStaff(${member.id})"><i class="fas fa-trash"></i></button></td></tr>`;
+                });
+                document.getElementById('staffTable').innerHTML = html || '<tr><td colspan="7" style="text-align:center;">No staff</td></tr>';
+            } catch (e) {
+                showAlert('staffAlert', 'error', 'Error loading staff');
+            }
+        }
+        
+        function openStaffModal() { document.getElementById('staffEditId').value = ''; document.querySelector('#staffModal form').reset(); document.getElementById('staffModal').classList.add('active'); }
+        function closeStaffModal() { document.getElementById('staffModal').classList.remove('active'); document.querySelector('#staffModal form').reset(); document.getElementById('staffEditId').value = ''; }
+        
+        async function saveStaff(event) {
+            event.preventDefault();
+            const formData = new FormData();
+            formData.append('name_english', document.getElementById('staffNameEn').value);
+            formData.append('name_marathi', document.getElementById('staffNameMr').value);
+            formData.append('role_english', document.getElementById('staffRoleEn').value);
+            formData.append('role_marathi', document.getElementById('staffRoleMr').value);
+            formData.append('department', document.getElementById('staffDept').value);
+            formData.append('email', document.getElementById('staffEmail').value);
+            formData.append('phone', document.getElementById('staffPhone').value);
+            formData.append('qualification', document.getElementById('staffQual').value);
+            formData.append('order', 0);
+
+            const photoFile = document.getElementById('staffPhoto').files[0];
+            if (photoFile) formData.append('file', photoFile);
+
+            try {
+                const editId = document.getElementById('staffEditId').value;
+                if (editId) {
+                    // Update existing staff
+                    const res = await fetch(`/api/admin/staff/${editId}`, { method: 'PUT', body: formData });
+                    if (res.ok) {
+                        closeStaffModal(); loadStaff(); loadDashboard(); showAlert('staffAlert','success','Staff updated');
+                    } else {
+                        const txt = await res.text(); showAlert('staffAlert','error','Error updating: '+txt);
+                    }
+                } else {
+                    const response = await fetch('/api/admin/staff', { method: 'POST', body: formData });
+                    if (response.ok) {
+                        // Close modal immediately and refresh lists
+                        closeStaffModal();
+                        loadStaff();
+                        loadDashboard();
+                        showAlert('staffAlert', 'success', 'Staff added successfully!');
+                    } else {
+                        const text = await response.text();
+                        showAlert('staffAlert', 'error', 'Error saving staff: ' + text);
+                    }
+                }
+            } catch (e) {
+                showAlert('staffAlert', 'error', 'Error: ' + e.message);
+            }
+        }
+        
+        async function deleteStaff(id) {
+            if (confirm('Delete this staff member?')) {
+                try {
+                    await fetch(`/api/admin/staff/${id}`, { method: 'DELETE' });
+                    loadStaff();
+                    loadDashboard();
+                } catch (e) {
+                    alert('Error deleting');
+                }
+            }
+        }
+        
+
+
+        // ===== GALLERY ADMIN =====
+        function openGalleryModal() { document.getElementById('galleryModal').classList.add('active'); }
+        function closeGalleryModal() { document.getElementById('galleryModal').classList.remove('active'); document.querySelector('#galleryModal form').reset(); }
+
+        // Edit document/staff helpers
+        async function openEditDocModal(docId) {
+            const res = await fetch('/api/admin/documents');
+            const docs = await res.json();
+            const doc = docs.find(d => d.id === docId);
+            if (!doc) { showAlert('docAlert','error','Document not found'); return; }
+            document.getElementById('docEditId').value = doc.id;
+            document.getElementById('docTitleEn').value = doc.title_english || '';
+            document.getElementById('docTitleMr').value = doc.title_marathi || '';
+            document.getElementById('docDescEn').value = doc.description_english || '';
+            document.getElementById('docDescMr').value = doc.description_marathi || '';
+            document.getElementById('docCategory').value = doc.category || 'other';
+            document.getElementById('docModal').classList.add('active');
+        }
+
+        function openEditStaffModal(staffId) {
+            fetch('/api/admin/staff').then(r => r.json()).then(list => {
+                const s = list.find(x => x.id === staffId);
+                if (!s) { showAlert('staffAlert','error','Staff not found'); return; }
+                document.getElementById('staffEditId').value = s.id;
+                document.getElementById('staffNameEn').value = s.name_english || '';
+                document.getElementById('staffNameMr').value = s.name_marathi || '';
+                document.getElementById('staffRoleEn').value = s.role_english || '';
+                document.getElementById('staffRoleMr').value = s.role_marathi || '';
+                document.getElementById('staffDept').value = s.department || '';
+                document.getElementById('staffEmail').value = s.email || '';
+                document.getElementById('staffPhone').value = s.phone || '';
+                document.getElementById('staffQual').value = s.qualification || '';
+                document.getElementById('staffModal').classList.add('active');
+            });
+        }
+        async function loadAdminGallery() {
+            try {
+                const res = await fetch('/api/admin/gallery');
+                const imgs = await res.json();
+                const grid = document.getElementById('galleryGrid');
+                if (!imgs || imgs.length === 0) {
+                    grid.innerHTML = '<p style="text-align:center;color:#666">No images uploaded</p>';
+                    return;
+                }
+                let html = '';
+                imgs.forEach(img => {
+                    const src = img.file_path ? '/' + img.file_path : 'https://via.placeholder.com/200x120/cccccc/666666?text=No';
+                    html += `<div class="col-6 col-md-3"><div style="position:relative;border-radius:8px;overflow:hidden;background:#fff;padding:8px;border:1px solid #eee"><img src="${src}" style="width:100%;height:140px;object-fit:cover;border-radius:6px" alt="${img.caption||''}"><div style="display:flex;justify-content:space-between;margin-top:8px;gap:8px"><small style="flex:1">${img.caption||''}</small><div><button class="btn btn-sm btn-secondary" onclick="openReplaceGalleryModal(${img.id})" title="Replace"><i class="fas fa-exchange-alt"></i></button>&nbsp;<button class="btn btn-sm btn-danger" onclick="deleteGallery(${img.id})"><i class="fas fa-trash"></i></button></div></div></div></div>`;
+                });
+                grid.innerHTML = html;
+            } catch (e) {
+                showAlert('galleryAlert', 'error', 'Error loading gallery');
+            }
+        }
+
+        async function uploadGallery(event) {
+            event.preventDefault();
+            const files = document.getElementById('galleryFiles').files;
+            if (!files || files.length === 0) { showAlert('galleryAlert', 'error', 'Please select at least one file'); return; }
+            const caption = document.getElementById('galleryCaption').value;
+            const form = new FormData();
+            for (let i=0;i<files.length;i++) form.append('files', files[i]);
+            if (caption) {
+                for (let i=0;i<files.length;i++) form.append('captions', caption);
+            }
+
+            try {
+                const res = await fetch('/api/admin/gallery', { method: 'POST', body: form, credentials: 'same-origin' });
+                const contentType = res.headers.get('content-type') || '';
+                if (res.ok) {
+                    closeGalleryModal();
+                    loadAdminGallery();
+                    loadDashboard();
+                    showAlert('galleryAlert', 'success', 'Photos uploaded!');
+                } else {
+                    let msg = await res.text();
+                    try { if (contentType.includes('application/json')) msg = JSON.parse(msg).message || msg; } catch(e) {}
+                    showAlert('galleryAlert', 'error', 'Error uploading: ' + msg);
+                }
+            } catch (e) {
+                showAlert('galleryAlert', 'error', 'Error: ' + e.message);
+            }
+        }
+
+        async function deleteGallery(id) {
+            if (!confirm('Delete this image?')) return;
+            try {
+                await fetch(`/api/admin/gallery/${id}`, { method: 'DELETE' });
+                loadAdminGallery();
+                loadDashboard();
+            } catch (e) { alert('Error deleting'); }
+        }
+        
+        // ===== Replace actions =====
+        function openReplaceDocModal(docId) { document.getElementById('replaceDocId').value = docId; document.getElementById('docReplaceModal').classList.add('active'); }
+        function closeDocReplaceModal() { document.getElementById('docReplaceModal').classList.remove('active'); document.querySelector('#docReplaceModal form').reset(); }
+
+        async function replaceDocument(event) {
+            event.preventDefault();
+            const id = document.getElementById('replaceDocId').value;
+            const file = document.getElementById('replaceDocFile').files[0];
+            if (!file) { showAlert('docAlert','error','Please select a file'); return; }
+            const form = new FormData(); form.append('file', file);
+            try {
+                const res = await fetch(`/api/admin/documents/${id}/replace`, { method: 'POST', body: form });
+                if (res.ok) {
+                    closeDocReplaceModal(); loadDocuments(); loadDashboard(); showAlert('docAlert','success','Document replaced');
+                } else {
+                    const txt = await res.text(); showAlert('docAlert','error','Error replacing: '+txt);
+                }
+            } catch (e) { showAlert('docAlert','error','Error: '+e.message); }
+        }
+
+        function openReplaceStaffModal(staffId) { document.getElementById('replaceStaffId').value = staffId; document.getElementById('staffReplaceModal').classList.add('active'); }
+        function closeStaffReplaceModal() { document.getElementById('staffReplaceModal').classList.remove('active'); document.querySelector('#staffReplaceModal form').reset(); }
+
+        async function replaceStaffPhoto(event) {
+            event.preventDefault();
+            const id = document.getElementById('replaceStaffId').value;
+            const file = document.getElementById('replaceStaffFile').files[0];
+            if (!file) { showAlert('staffAlert','error','Please select a file'); return; }
+            const form = new FormData(); form.append('file', file);
+            try {
+                // Use PUT to update staff (existing endpoint supports file)
+                const res = await fetch(`/api/admin/staff/${id}`, { method: 'PUT', body: form });
+                if (res.ok) {
+                    closeStaffReplaceModal(); loadStaff(); loadDashboard(); showAlert('staffAlert','success','Photo replaced');
+                } else {
+                    const txt = await res.text(); showAlert('staffAlert','error','Error replacing: '+txt);
+                }
+            } catch (e) { showAlert('staffAlert','error','Error: '+e.message); }
+        }
+
+        function openReplaceGalleryModal(imgId) { document.getElementById('replaceGalleryId').value = imgId; document.getElementById('galleryReplaceModal').classList.add('active'); }
+        function closeGalleryReplaceModal() { document.getElementById('galleryReplaceModal').classList.remove('active'); document.querySelector('#galleryReplaceModal form').reset(); }
+
+        async function replaceGalleryImage(event) {
+            event.preventDefault();
+            const id = document.getElementById('replaceGalleryId').value;
+            const file = document.getElementById('replaceGalleryFile').files[0];
+            const caption = document.getElementById('replaceGalleryCaption').value;
+            if (!file) { showAlert('galleryAlert','error','Please select a file'); return; }
+            const form = new FormData(); form.append('file', file); if (caption) form.append('caption', caption);
+            try {
+                const res = await fetch(`/api/admin/gallery/${id}/replace`, { method: 'POST', body: form });
+                if (res.ok) {
+                    closeGalleryReplaceModal(); loadAdminGallery(); loadDashboard(); showAlert('galleryAlert','success','Image replaced');
+                } else {
+                    const txt = await res.text(); showAlert('galleryAlert','error','Error replacing: '+txt);
+                }
+            } catch (e) { showAlert('galleryAlert','error','Error: '+e.message); }
+        }
+
+        
+        const pendingAlertActions = {};        function handleAlertOk(id) {
+            if (pendingAlertActions[id]) {
+                try { pendingAlertActions[id](); } catch (e) { console.error(e); }
+                delete pendingAlertActions[id];
+            }
+            const alert = document.getElementById(id);
+            alert.className = 'alert';
+            alert.innerHTML = '';
+        }
+
+        function showAlert(id, type, msg, persistent=false, callback=null) {
+            const alert = document.getElementById(id);
+            alert.innerHTML = '';
+            const msgEl = document.createElement('span');
+            msgEl.textContent = msg;
+            alert.appendChild(msgEl);
+
+            alert.className = 'alert ' + (type || '');
+
+            if (persistent) {
+                const btn = document.createElement('button');
+                btn.className = 'btn btn-sm btn-secondary';
+                btn.style.marginLeft = '10px';
+                btn.textContent = 'OK';
+                btn.onclick = () => handleAlertOk(id);
+                alert.appendChild(btn);
+                if (callback && typeof callback === 'function') {
+                    pendingAlertActions[id] = callback;
+                }
+            } else {
+                setTimeout(() => { alert.className = 'alert'; alert.innerHTML = ''; }, 5000);
+            }
+        }
+        
+        function logout() {
+            if (confirm('Are you sure?')) {
+                window.location.href = '/admin/logout';
+            }
+        }
+    </script>
+</body>
+</html>

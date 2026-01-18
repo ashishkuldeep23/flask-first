@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forgot Password - Admin</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #8b0000 0%, #6b1a1a 100%); min-height:100vh; display:flex; align-items:center; justify-content:center; }
+        .card { width: 400px; padding: 30px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); background: #fff; animation: slideIn 0.5s ease; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .btn-primary { background:#8b0000; border: none; }
+        .btn-primary:hover { background-color: #6b1a1a; }
+        .alert { display:none; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h3 style="color:#8b0000; text-align:center;"><i class="fas fa-envelope"></i> Reset Password</h3>
+        <p style="text-align:center; color:#666; font-size:13px; margin-bottom: 25px;">Enter your <strong>username or email</strong>. If it exists you'll receive a reset link via email.</p>
+
+        <div id="alertBox" class="alert"></div>
+
+        <form id="forgotForm" onsubmit="handleForgot(event)">
+            <div class="mb-3">
+                <label for="identifier" class="form-label" style="font-weight: 600;">Username or Email</label>
+                <input type="text" class="form-control" id="identifier" required placeholder="admin or you@example.com" autocomplete="username">
+            </div>
+            <button class="btn btn-primary w-100" id="sendBtn">Continue</button>
+        </form>
+
+        <div style="margin-top:15px; text-align:center;">
+            <a href="/admin/login" style="color:#8b0000; font-weight:600; text-decoration:none;">Back to login</a>
+        </div>
+    </div>
+
+    <script>
+        async function handleForgot(e){
+            e.preventDefault();
+            const identifier = document.getElementById('identifier').value.trim();
+            const sendBtn = document.getElementById('sendBtn');
+            const alertBox = document.getElementById('alertBox');
+            alertBox.className = 'alert';
+            sendBtn.disabled = true;
+            sendBtn.innerText = "Sending...";
+
+            try{
+                const res = await fetch('/admin/forgot', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ identifier })
+                });
+                const data = await res.json();
+                
+                // Show Success Message
+                alertBox.textContent = data.message || 'If that username/email is registered, a reset link will be sent to the associated email.';
+                alertBox.className = 'alert alert-success';
+                alertBox.style.display = 'block';
+
+                // Show warning if email delivery failed
+                if(data.warning){
+                    const warningBox = document.createElement('div');
+                    warningBox.className = 'alert alert-warning';
+                    warningBox.style.marginTop = '10px';
+                    warningBox.innerHTML = `<strong>Dev Mode:</strong> ${data.warning}<br><a href="${data.reset_link}" class="btn btn-sm btn-warning mt-2">Use Reset Link for Testing</a>`;
+                    alertBox.parentNode.insertBefore(warningBox, alertBox.nextSibling);
+                }
+
+                // Return to login after a delay
+                setTimeout(()=>{ window.location.href = '/admin/login'; }, 3000);
+                
+            }catch(err){
+                alertBox.textContent = 'Connection error. Please try again.';
+                alertBox.className = 'alert alert-danger';
+                alertBox.style.display = 'block';
+                sendBtn.disabled = false;
+                sendBtn.innerText = "Continue";
+            }
+        }
+    </script>
+</body>
+</html>
