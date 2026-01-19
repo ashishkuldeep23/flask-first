@@ -296,7 +296,11 @@ def admin_login():
     """Admin login page"""
     if request.method == 'POST':
         data = request.json
+        print('data',data)
         admin = Admin.query.filter_by(username=data.get('username')).first()
+        password = Admin.query.filter_by(username=data.get('password')).first()
+        print('admin',admin)
+        print("password",password)
         
         if admin and admin.check_password(data.get('password')):
             session['admin_id'] = admin.id
